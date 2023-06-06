@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Play.Common;
+using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
 
 namespace Play.Inventory.Service.Controllers;
@@ -9,10 +10,12 @@ namespace Play.Inventory.Service.Controllers;
 public class ItemsController : ControllerBase
 {
     private readonly IRepository<InventoryItem> _itemsRepository;
+    private readonly CatalogClient _catalogClient;
 
-    public ItemsController(IRepository<InventoryItem> itemsRepository)
+    public ItemsController(IRepository<InventoryItem> itemsRepository, CatalogClient catalogClient)
     {
         _itemsRepository = itemsRepository;
+        _catalogClient = catalogClient;
     }
 
     [HttpGet]
@@ -20,9 +23,16 @@ public class ItemsController : ControllerBase
     {
         if (userId == Guid.Empty) return BadRequest();
 
-        var items = (await _itemsRepository.GetAllAsync(item => item.UserId == userId))
-            .Select(x => x.AsDto());
-        return Ok(items);
+        var catalogItems = await _catalogClient.GetCatalogItemsAsync();
+        var inventoryItems = await _itemsRepository.GetAllAsync(item => item.UserId == userId);
+
+        var inventoryItemDtos = inventoryItems.Select(inventoryItem =>
+        {
+            var catalogItem = catalogItems.Single(catalogItem => catalogItem.Id == inventoryItem.CatalogItemId);
+            return inventoryItem.AsDto(catalogItem.Name, catalogItem.Description);
+        });
+        
+        return Ok(inventoryItemDtos);
     }
 
     [HttpPost]
@@ -49,7 +59,7 @@ public class ItemsController : ControllerBase
             inventoryItem.Quantity += grantItemsDto.Quantity;
             await _itemsRepository.UpdateAsync(inventoryItem);
         }
-        
+
         return Ok();
     }
 }
