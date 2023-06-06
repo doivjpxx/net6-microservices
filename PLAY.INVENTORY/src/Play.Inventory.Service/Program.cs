@@ -14,10 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<CatalogClient>(client =>
-{
-    client.BaseAddress = new Uri("https://localhost:5001");
-});
+builder.Services.AddHttpClient<CatalogClient>(client => { client.BaseAddress = new Uri("https://localhost:5001"); })
+    .AddPolicyHandler(Polly.Policy.TimeoutAsync<HttpResponseMessage>(1));
 
 var app = builder.Build();
 
