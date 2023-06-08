@@ -27,6 +27,7 @@ builder.Services.AddHttpClient<CatalogClient>(client => { client.BaseAddress = n
                     "Delaying for {delay}ms, then making retry {retry}.", span.TotalMilliseconds,
                     retryAttempt);
             }))
+    .AddTransientHttpErrorPolicy(policyBuilder => policyBuilder.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)))
     .AddPolicyHandler(Polly.Policy.TimeoutAsync<HttpResponseMessage>(1));
 
 var app = builder.Build();

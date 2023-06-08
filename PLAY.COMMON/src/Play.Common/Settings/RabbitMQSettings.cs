@@ -1,8 +1,9 @@
 namespace Play.Catalog.Service.Settings;
 
-public class MongoDbSettings
+public class RabbitMQSettings
 {
     public string Host { get; init; }
     public int Port { get; init; }
-    public string ConnectionString => $"mongodb://{Host}:{Port}";
+    
+    public string ConnectionString => $"amqp://{Host}:{Port}";
 }

@@ -1,10 +1,6 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 using Play.Catalog.Service.Entities;
 using Play.Catalog.Service.Repositories;
-using Play.Catalog.Service.Settings;
+using Play.Common.MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +13,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMongo();
 builder.Services.AddMongoRepository<Item>("items");
+builder.Services.AddMassTransitWithRabbitMq();
 
 var app = builder.Build();
 

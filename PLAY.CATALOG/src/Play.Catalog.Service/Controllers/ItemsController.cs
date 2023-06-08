@@ -1,3 +1,5 @@
+using DefaultNamespace;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Play.Catalog.Service.Entities;
 using Play.Common;
@@ -9,10 +11,12 @@ namespace Play.Catalog.Service.Controllers;
 public class ItemsController : ControllerBase
 {
     private readonly IRepository<Item> _itemsRepository;
+    private readonly IPublishEndpoint _publishEndpoint;
 
-    public ItemsController(IRepository<Item> itemsRepository)
+    public ItemsController(IRepository<Item> itemsRepository, IPublishEndpoint publishEndpoint)
     {
         _itemsRepository = itemsRepository;
+        _publishEndpoint = publishEndpoint;
     }
 
     [HttpGet]
@@ -47,6 +51,8 @@ public class ItemsController : ControllerBase
 
         await _itemsRepository.CreateAsync(item);
 
+        await _publishEndpoint.Publish(new CatalogItemCreated(item.Id, item.Name, item.Description));
+
         return CreatedAtAction(nameof(GetByIdAsync), new { id = item.Id }, item);
     }
 
@@ -64,6 +70,8 @@ public class ItemsController : ControllerBase
         existingItem.Description = updateItemDto.Description;
 
         await _itemsRepository.UpdateAsync(existingItem);
+        
+        await _publishEndpoint.Publish(new CatalogItemUpdated(existingItem.Id, existingItem.Name, existingItem.Description));
 
         return Ok();
     }
@@ -79,6 +87,8 @@ public class ItemsController : ControllerBase
         }
 
         await _itemsRepository.RemoveAsync(id);
+        
+        await _publishEndpoint.Publish(new CatalogItemDeleted(id));
 
         return Ok();
     }
