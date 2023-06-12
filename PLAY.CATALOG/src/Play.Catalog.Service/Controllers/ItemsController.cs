@@ -1,6 +1,6 @@
-using DefaultNamespace;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Play.Catalog.Contracts;
 using Play.Catalog.Service.Entities;
 using Play.Common;
 

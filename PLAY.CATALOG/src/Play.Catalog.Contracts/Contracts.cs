@@ -1,6 +1,4 @@
-using System;
-
-namespace DefaultNamespace;
+namespace Play.Catalog.Contracts;
 
 public record CatalogItemCreated(Guid Id, string Name, string Description);
 
